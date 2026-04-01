@@ -14,3 +14,13 @@ def add_user(username: str, email: str):
                         ''',
                         (username, email)
             )
+
+def view_users():
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''
+                        SELECT * FROM users
+                        ''')
+            rows = cur.fetchall()
+            for row in rows:
+                print(row)
