@@ -2,6 +2,7 @@ import psycopg
 from db_connect import db_connect
 
 def add_user(username: str, email: str):
+    """Adds a user to the users table in the database"""
     with db_connect() as conn:
         with conn.cursor() as cur:
             cur.execute('''
