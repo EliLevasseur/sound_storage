@@ -1,4 +1,4 @@
-from db import add_user, view_users, add_file, view_files, get_file
+from db import add_user, view_users, add_file, view_files, get_file, add_project, get_projects
 from fastapi.responses import Response
 from fastapi import FastAPI, UploadFile, File, Form
 
@@ -8,6 +8,8 @@ app = FastAPI()
 def home():
     return {"message": "Sound Storage API is running"}
 
+# -------------------------- USERS -------------------------- 
+
 @app.get("/users")
 def get_users():
     return view_users()
@@ -16,6 +18,8 @@ def get_users():
 def create_user(username: str = Form(...), email: str = Form(...)):
     add_user(username, email)
     return {"message": "User added successfully"}
+
+# -------------------------- FILES -------------------------- 
 
 @app.post("/files")
 async def upload_file(user_id: int = Form(...), file: UploadFile = File(...)):
@@ -43,3 +47,13 @@ def download_file(file_id: int):
             "Content-Disposition": f"attachment; filename={file_name}"
         }
     )
+
+# -------------------------- PROJECTS -------------------------- 
+@app.post("/projects/")
+def create_project(project_name: str = Form(...), owner_id: int = Form(...), is_private: bool = Form(...)):
+    add_project(project_name, owner_id, is_private)
+    return {"message": "Project added succesfully"}
+
+@app.get("/projects/")
+def view_projects():
+    return get_projects()

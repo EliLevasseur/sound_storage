@@ -20,7 +20,7 @@ def view_users():
                         ''')
             rows = cur.fetchall()
             return [
-                {"id": row[0], "username": row[1], "email": row[2]}
+                {"id": row[0], "username": row[1], "email": row[2], "date_joined": str(row[3])[:10]}
                 for row in rows
             ]
 
@@ -52,6 +52,32 @@ def get_file(file_id: int):
                 '''
                 SELECT file_name, file_data FROM files WHERE id = %s
                 ''',
-                (file_id,)
+                (file_id)
             )
             return cur.fetchone()
+        
+def add_project(project_name: str, owner_id: int, is_private: bool):
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                INSERT INTO projects (project_name, owner_id, is_private)
+                VALUES (%s, %s, %s)
+                """,
+                (project_name, owner_id, is_private)
+            )
+
+
+def get_projects():
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                SELECT * FROM projects
+                """
+            )
+            rows = curr.fetchall()
+            return [
+                {"id": row[0], "owner_id": row[1], "project_name": row[2], "description": row[3], "is_private": row[4], "date_created": row[5]}
+                for row in rows
+            ]
