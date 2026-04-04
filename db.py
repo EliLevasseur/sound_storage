@@ -52,7 +52,7 @@ def get_file(file_id: int):
                 '''
                 SELECT file_name, file_data FROM files WHERE id = %s
                 ''',
-                (file_id)
+                (file_id,)
             )
             return cur.fetchone()
         
