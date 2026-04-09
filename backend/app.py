@@ -1,4 +1,4 @@
-from db import add_user, view_users, add_file, view_files, get_file, add_project, get_projects
+from db import add_file, add_project, add_user, get_file, get_projects, view_files, view_users
 from fastapi.responses import Response
 from fastapi import FastAPI, UploadFile, File, Form
 

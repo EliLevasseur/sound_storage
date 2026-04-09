@@ -1,4 +1,5 @@
 import psycopg
+
 from db_connect import db_connect
 
 def add_user(username: str, email: str):
