@@ -1,7 +1,8 @@
-from db import add_file, add_project, add_user, get_file, get_projects, view_files, view_users, get_project_members, add_member
-from db_auto import get_project_id
-from fastapi.responses import Response
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI
+
+from api.files import router as files_router
+from api.projects import router as projects_router
+from api.users import router as users_router
 
 app = FastAPI()
 
@@ -9,64 +10,6 @@ app = FastAPI()
 def home():
     return {"message": "Sound Storage API is running"}
 
-# -------------------------- USERS -------------------------- 
-
-@app.get("/users")
-def get_users():
-    return view_users()
-
-@app.post("/users")
-def create_user(username: str = Form(...), email: str = Form(...)):
-    add_user(username, email)
-    return {"message": "User added successfully"}
-
-# -------------------------- FILES -------------------------- 
-
-@app.post("/files")
-async def upload_file(user_id: int = Form(...), file: UploadFile = File(...)):
-    content = await file.read()
-    add_file(user_id, file.filename, content)
-    return {"message": "File uploaded successfully"}
-
-@app.get("/files")
-def get_files():
-    return view_files()
-
-@app.get("/files/{file_id}")
-def download_file(file_id: int):
-    result = get_file(file_id)
-
-    if not result:
-        return {"error": "File not found"}
-
-    file_name, file_data = result
-
-    return Response(
-        content=file_data,
-        media_type="application/octet-stream",
-        headers={
-            "Content-Disposition": f"attachment; filename={file_name}"
-        }
-    )
-
-# -------------------------- PROJECTS -------------------------- 
-@app.post("/projects/")
-def create_project(project_name: str = Form(...), owner_id: int = Form(...), is_private: bool = Form(...)):
-    add_project(project_name, owner_id, is_private)
-    add_member(get_project_id(project_name), owner_id, "owner")
-    return {"message": "Project added succesfully"}
-
-@app.get("/projects/")
-def view_projects():
-    return get_projects()
-
-@app.post("/project_members/")
-def member_add(project_id: int = Form(...), user_id: int = Form(...), user_role: str = Form(...)):
-    add_member(project_id, user_id, user_role)
-    return {"message": "Member added succesfully"}
-
-
-@app.get("/project_members/")
-def view_members():
-    return get_project_members()
-
+app.include_router(users_router)
+app.include_router(files_router)
+app.include_router(projects_router)
