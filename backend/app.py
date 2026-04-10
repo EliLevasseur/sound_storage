@@ -1,4 +1,5 @@
 from db import add_file, add_project, add_user, get_file, get_projects, view_files, view_users, get_project_members, add_member
+from db_auto import get_project_id
 from fastapi.responses import Response
 from fastapi import FastAPI, UploadFile, File, Form
 
@@ -52,6 +53,7 @@ def download_file(file_id: int):
 @app.post("/projects/")
 def create_project(project_name: str = Form(...), owner_id: int = Form(...), is_private: bool = Form(...)):
     add_project(project_name, owner_id, is_private)
+    add_member(get_project_id(project_name), owner_id, "owner")
     return {"message": "Project added succesfully"}
 
 @app.get("/projects/")
