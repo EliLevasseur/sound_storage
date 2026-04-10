@@ -82,3 +82,31 @@ def get_projects():
                 {"id": row[0], "owner_id": row[1], "project_name": row[2], "description": row[3], "is_private": row[4], "date_created": row[5]}
                 for row in rows
             ]
+
+def get_project_members():
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                SELECT projects.project_name, users.username, user_role
+                FROM project_members
+                INNER JOIN projects ON project_members.project_id = projects.id
+                INNER JOIN users ON project_members.user_id = users.id;
+                """
+            )
+            rows = curr.fetchall()
+            return [
+                {'project_name': row[0], 'username': row[1], 'role': row[2]}
+                for row in rows
+            ]
+        
+def add_member(project_id: int, user_id: int, user_role: str):
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                INSERT INTO project_members (project_id, user_id, user_role)
+                VALUES (%s, %s, %s);
+                """,
+                (project_id, user_id, user_role)
+            )

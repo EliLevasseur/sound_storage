@@ -1,4 +1,4 @@
-from db import add_file, add_project, add_user, get_file, get_projects, view_files, view_users
+from db import add_file, add_project, add_user, get_file, get_projects, view_files, view_users, get_project_members, add_member
 from fastapi.responses import Response
 from fastapi import FastAPI, UploadFile, File, Form
 
@@ -57,3 +57,14 @@ def create_project(project_name: str = Form(...), owner_id: int = Form(...), is_
 @app.get("/projects/")
 def view_projects():
     return get_projects()
+
+@app.post("/project_members/")
+def member_add(project_id: int = Form(...), user_id: int = Form(...), user_role: str = Form(...)):
+    add_member(project_id, user_id, user_role)
+    return {"message": "Member added succesfully"}
+
+
+@app.get("/project_members/")
+def view_members():
+    return get_project_members()
+
