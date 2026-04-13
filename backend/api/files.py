@@ -1,15 +1,19 @@
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
 from db.files import add_file, get_file, view_files
+from file_storage import download_file_bytes, save_upload_file
 
 router = APIRouter()
 
 
 @router.post("/files")
 async def upload_file(user_id: int = Form(...), file: UploadFile = File(...)):
-    content = await file.read()
-    add_file(user_id, file.filename, content)
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Missing file name")
+
+    storage_key, size_bytes = save_upload_file(user_id, file)
+    add_file(user_id, file.filename, storage_key, size_bytes)
     return {"message": "File uploaded successfully"}
 
 
@@ -23,14 +27,13 @@ def download_file(file_id: int):
     result = get_file(file_id)
 
     if not result:
-        return {"error": "File not found"}
+        raise HTTPException(status_code=404, detail="File not found")
 
-    file_name, file_data = result
+    file_name, storage_key = result
+    file_data = download_file_bytes(storage_key)
 
     return Response(
         content=file_data,
         media_type="application/octet-stream",
-        headers={
-            "Content-Disposition": f"attachment; filename={file_name}"
-        }
+        headers={"Content-Disposition": f"attachment; filename={file_name}"},
     )
