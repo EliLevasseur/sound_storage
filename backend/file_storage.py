@@ -19,9 +19,10 @@ def _safe_filename(file_name: str):
     return Path(file_name or "upload.bin").name
 
 
-def save_upload_file(user_id: int, upload: UploadFile):
+def save_upload_file(project_id: int, user_id: int, upload: UploadFile):
     file_name = _safe_filename(upload.filename)
-    storage_key = f"users/{user_id}/{uuid4().hex}_{file_name}"
+    storage_key = f"projects/{project_id}/{user_id}{uuid4().hex}_{file_name}"
+
 
     upload.file.seek(0)
     file_bytes = upload.file.read()
