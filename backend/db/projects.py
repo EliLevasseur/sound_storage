@@ -1,15 +1,15 @@
 from db.connection import db_connect
 
 
-def add_project(project_name: str, owner_id: int, is_private: bool):
+def add_project(project_name: str, owner_id: int, description: str, is_private: bool):
     with db_connect() as conn:
         with conn.cursor() as curr:
             curr.execute(
                 """
-                INSERT INTO projects (project_name, owner_id, is_private)
-                VALUES (%s, %s, %s)
+                INSERT INTO projects (project_name, owner_id, description, is_private)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (project_name, owner_id, is_private)
+                (project_name, owner_id, description, is_private)
             )
 
 
@@ -66,6 +66,32 @@ def get_project_id(project_name: str):
                 SELECT id FROM projects WHERE project_name = %s
                 """,
                 (project_name,)
+            )
+            result = curr.fetchone()
+            return result[0] if result else None
+
+
+def get_current_user(session_token: str):
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                SELECT user_id FROM user_sessions WHERE session_token = %s AND expires_at > NOW()
+                """,
+                (session_token,)
+            )
+            result = curr.fetchone()
+            return result[0] if result else None
+
+
+def get_user_role(project_id: int, user_id: int):
+    with db_connect() as conn:
+        with conn.cursor() as curr:
+            curr.execute(
+                """
+                SELECT user_role FROM project_members WHERE user_id = %s AND project_id = %s
+                """,
+                (user_id, project_id,)
             )
             result = curr.fetchone()
             return result[0] if result else None
